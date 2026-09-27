@@ -12,7 +12,7 @@ GLaDOS / Railgun 自动签到脚本（2026-09 修复版）
 
 用法（GitHub Actions 里由 workflow 注入 secrets，无需手动跑）：
     GLADOS_COOKIES       必填，Cookie 串，多账号用 & 连接
-    GLADOS_EXCHANGE_PLAN  可选，plan100/plan200/plan500（默认 plan500）
+    GLADOS_EXCHANGE_PLAN  可选，plan100/plan200/plan500（默认不自动兑换）
     GLADOS_USER_AGENT     可选，浏览器 UA 字符串（建议填真实浏览器 UA）
     GLADOS_DOMAINS        可选，逗号分隔，默认 glados.cloud
     PUSHDEER_SENDKEY      可选，PushDeer 推送 key
@@ -46,7 +46,7 @@ EXCHANGE_PLANS = {
     "plan200": 200,
     "plan500": 500,
 }
-DEFAULT_EXCHANGE_PLAN = "plan500"
+# 默认不自动兑换积分；如需开启，设置 GLADOS_EXCHANGE_PLAN=plan100/plan200/plan500
 
 
 class Config:
@@ -54,7 +54,7 @@ class Config:
         raw = os.environ.get("GLADOS_COOKIES", "")
         # 多账号用 & 分隔；过滤空串
         self.cookies: List[str] = [c.strip() for c in raw.split("&") if c.strip()]
-        self.exchange_plan = os.environ.get("GLADOS_EXCHANGE_PLAN", DEFAULT_EXCHANGE_PLAN)
+        self.exchange_plan = os.environ.get("GLADOS_EXCHANGE_PLAN", "")
         self.pushdeer_sendkey = os.environ.get("PUSHDEER_SENDKEY", "")
         self.user_agent = os.environ.get("GLADOS_USER_AGENT", DEFAULT_UA)
         domains_raw = os.environ.get("GLADOS_DOMAINS", ",".join(DEFAULT_DOMAINS))
@@ -168,8 +168,11 @@ def run_one(cfg: Config, cookie: str, idx: int, domain: str) -> CheckinResult:
 
     result.points_total, _ = api.get_points(cookie)
 
-    required = EXCHANGE_PLANS.get(cfg.exchange_plan, 500)
-    result.exchange = api.exchange(cookie, cfg.exchange_plan) if required else "未兑换"
+    # 只有显式配置了兑换计划（plan100/plan200/plan500）才自动兑换，默认不兑换
+    if cfg.exchange_plan in EXCHANGE_PLANS:
+        result.exchange = api.exchange(cookie, cfg.exchange_plan)
+    else:
+        result.exchange = "未开启自动兑换"
 
     return result
 
