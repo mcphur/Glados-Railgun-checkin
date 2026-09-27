@@ -22,7 +22,7 @@ import sys
 import json
 import logging
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 from typing import Dict, List, Optional
 
 import requests
@@ -66,7 +66,7 @@ class Config:
 # API 封装
 # ---------------------------------------------------------------------------
 
-class APIEndpoint(str, Enum):
+class APIEndpoint(StrEnum):
     CHECKIN = "/api/user/checkin"
     STATUS = "/api/user/status"
     POINTS = "/api/user/points"
