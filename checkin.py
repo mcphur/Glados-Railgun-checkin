@@ -32,8 +32,12 @@ import requests
 # ---------------------------------------------------------------------------
 
 DEFAULT_DOMAINS = ["glados.cloud"]
+# GLaDOS 2026-09 起校验「设备指纹」：签到请求的 UA 必须与你登录时所用设备一致，
+# 否则返回 code=4 device-mismatch / "Automated check-in detected"。
+# 本账号实测登录设备为 macOS，故默认 UA 用 macOS；若你用其它设备登录，
+# 请通过环境变量 GLADOS_USER_AGENT 覆盖为对应设备的 UA。
 DEFAULT_UA = (
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
     "(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
 )
 
