@@ -204,11 +204,16 @@ def main() -> None:
             logging.info("[账号%d] %s: %s | 剩余: %s | 积分: %s | %s",
                          idx, domain, r.status, r.days, r.points_total, r.exchange)
 
+    # 统计（与原始脚本一致：0=成功，1=重复，其余=失败）
+    success_count = sum(1 for r in results if r.code == 0)
+    repeat_count = sum(1 for r in results if r.code == 1)
+    fail_count = sum(1 for r in results if r.code not in (0, 1))
+
     # 汇总输出
     lines = []
     for r in results:
         lines.append(f"账号{r.account_idx} [{r.domain}] {r.status} | 剩余{r.days} | {r.points_total} | {r.exchange}")
-    title = "GLaDOS 签到结果"
+    title = f"GLaDOS 签到, 成功{success_count}, 失败{fail_count}, 重复{repeat_count}"
     content = "\n".join(lines)
     logging.info("===== 汇总 =====\n%s", content)
     push(cfg, title, content)
